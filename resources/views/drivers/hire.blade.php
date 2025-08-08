@@ -10,11 +10,27 @@
             @csrf
             <div class="mb-4">
                 <label for="car_location" class="block font-semibold mb-1">Car Location</label>
-                <input type="text" name="car_location" id="car_location" class="block w-full border rounded px-2 py-1" required>
+                <select name="car_location" id="car_location" class="block w-full border rounded px-2 py-1" required>
+                    <option value="">Select Area</option>
+                    <option value="Gulshan, Dhaka">Gulshan, Dhaka</option>
+                    <option value="Banani, Dhaka">Banani, Dhaka</option>
+                    <option value="Dhanmondi, Dhaka">Dhanmondi, Dhaka</option>
+                    <option value="Uttara, Dhaka">Uttara, Dhaka</option>
+                    <option value="Mirpur, Dhaka">Mirpur, Dhaka</option>
+                    <option value="Chittagong, Bangladesh">Chittagong, Bangladesh</option>
+                </select>
             </div>
             <div class="mb-4">
                 <label for="destination" class="block font-semibold mb-1">Destination</label>
-                <input type="text" name="destination" id="destination" class="block w-full border rounded px-2 py-1" required>
+                <select name="destination" id="destination" class="block w-full border rounded px-2 py-1" required>
+                    <option value="">Select Destination</option>
+                    <option value="Gulshan, Dhaka">Gulshan, Dhaka</option>
+                    <option value="Banani, Dhaka">Banani, Dhaka</option>
+                    <option value="Dhanmondi, Dhaka">Dhanmondi, Dhaka</option>
+                    <option value="Uttara, Dhaka">Uttara, Dhaka</option>
+                    <option value="Mirpur, Dhaka">Mirpur, Dhaka</option>
+                    <option value="Chittagong, Bangladesh">Chittagong, Bangladesh</option>
+                </select>
             </div>
             <div class="mb-4">
                 <label for="service_type" class="block font-semibold mb-1">Service Type</label>
@@ -39,4 +55,50 @@
             </button>
         </form>
     </div>
+    <div id="map" style="height: 400px; width: 100%;" class="mt-6"></div>
+
+    
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBW2cnlqruVIYZC7YgYC4j9XcVzeGshEOw"></script>
+    <script>
+        let map, directionsService, directionsRenderer;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 23.8103, lng: 90.4125 },
+                zoom: 12,
+            });
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
+        }
+
+        function calculateRoute() {
+            const origin = document.getElementById("car_location").value;
+            const destination = document.getElementById("destination").value;
+            if (origin && destination) {
+                directionsService.route(
+                    {
+                        origin,
+                        destination,
+                        travelMode: google.maps.TravelMode.DRIVING,
+                    },
+                    (response, status) => {
+                        if (status === "OK") {
+                            directionsRenderer.setDirections(response);
+                        } else {
+                            directionsRenderer.setDirections({routes: []});
+                        }
+                    }
+                );
+            } else {
+                directionsRenderer.setDirections({routes: []});
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            initMap();
+            document.getElementById("car_location").addEventListener("change", calculateRoute);
+            document.getElementById("destination").addEventListener("change", calculateRoute);
+        });
+    </script>
 </x-app-layout>
