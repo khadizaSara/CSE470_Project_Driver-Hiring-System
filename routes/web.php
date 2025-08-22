@@ -4,8 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\HireDriverController;
 use App\Http\Controllers\DriverSelectionController;
-
-
+use App\Http\Controllers\BookingController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -31,6 +30,12 @@ Route::middleware(['auth'])->group(function () {
     // Driver selection submission (handles user choosing a driver)
     Route::post('/drivers/select', [DriverSelectionController::class, 'select'])->name('drivers.select');
 
+    Route::post('/booking', [BookingController::class, 'store'])->name('booking.store')->middleware('auth');
+    Route::get('/track-driver/{booking}', [BookingController::class, 'track'])->name('booking.track')->middleware('auth');
+
+    Route::get('/api/driver-location/{booking}', [BookingController::class, 'driverLocation'])
+    ->name('api.driver.location')
+    ->middleware('auth');
 
     Route::post('/test-route', function () {
     return 'Test route works';

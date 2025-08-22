@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Driver;  // Import the Driver model
 
 class DriverSelectionController extends Controller
 {
@@ -14,37 +15,10 @@ class DriverSelectionController extends Controller
             'service_type' => 'required|in:regular,urgent',
         ]);
 
-        $drivers = [
-            [
-                'id' => 1,
-                'name' => 'John Doe',
-                'age' => 35,
-                'experience' => 5,
-                'rating' => 4.5,
-                'type' => 'both',
-            ],
-            [
-                'id' => 2,
-                'name' => 'Jane Smith',
-                'age' => 29,
-                'experience' => 3,
-                'rating' => 4.0,
-                'type' => 'regular',
-            ],
-            [
-                'id' => 3,
-                'name' => 'Bob Johnson',
-                'age' => 45,
-                'experience' => 10,
-                'rating' => 4.8,
-                'type' => 'urgent',
-            ],
-        ];
-
-        // Filter drivers by service type
-        $drivers = array_filter($drivers, function ($driver) use ($data) {
-            return $driver['type'] === $data['service_type'] || $driver['type'] === 'both';
-        });
+        // Fetch drivers from database where type matches selected service_type or is 'both'
+        $drivers = Driver::where('type', $data['service_type'])
+                    ->orWhere('type', 'both')
+                    ->get();
 
         return view('drivers.list', compact('drivers', 'data'));
     }
