@@ -24,23 +24,27 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/hire-driver', [HireDriverController::class, 'showForm'])->name('driver.hire.form');
     Route::post('/hire-driver', [HireDriverController::class, 'submitForm'])->name('driver.hire.submit');
 
-    // Driver list page (displays list of drivers after form submission)
+    // GET fallback route to avoid MethodNotAllowedHttpException for /drivers/list
+    Route::get('/drivers/list', function () {
+        return redirect()->route('driver.hire.form')->with('error', 'Please fill out the hire driver form first.');
+    })->name('drivers.list.get');
+
+    // ONLY allow POST request on /drivers/list
     Route::post('/drivers/list', [DriverSelectionController::class, 'showList'])->name('drivers.list');
 
-    // Driver selection submission (handles user choosing a driver)
+    // Driver selection submission
     Route::post('/drivers/select', [DriverSelectionController::class, 'select'])->name('drivers.select');
 
     Route::post('/booking', [BookingController::class, 'store'])->name('booking.store')->middleware('auth');
     Route::get('/track-driver/{booking}', [BookingController::class, 'track'])->name('booking.track')->middleware('auth');
 
     Route::get('/api/driver-location/{booking}', [BookingController::class, 'driverLocation'])
-    ->name('api.driver.location')
-    ->middleware('auth');
+        ->name('api.driver.location')
+        ->middleware('auth');
 
     Route::post('/test-route', function () {
-    return 'Test route works';
+        return 'Test route works';
     })->name('test.route');
-
 });
 
 require __DIR__.'/auth.php';

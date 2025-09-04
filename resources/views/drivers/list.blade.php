@@ -9,6 +9,8 @@
         <p><strong>Car Location:</strong> {{ $data['car_location'] }}</p>
         <p><strong>Destination:</strong> {{ $data['destination'] }}</p>
         <p><strong>Service Type:</strong> {{ ucfirst($data['service_type']) }}</p>
+        <p><strong>Car Type:</strong> {{ $data['car_type'] }}</p>
+        <p><strong>Fare:</strong> {{ $data['fare'] }} ৳</p>
 
         <h3 class="text-lg font-semibold mt-6 mb-4">Available Drivers</h3>
 
@@ -23,7 +25,7 @@
                 <button type="button"
                     class="choose-driver-btn mt-3"
                     style="
-                        background: #2563eb;  /* Crisp blue */
+                        background: #2563eb;
                         color: #ffffff;
                         padding: 0.5rem 1rem;
                         border-radius: 0.375rem;
@@ -53,14 +55,16 @@
                 <input type="hidden" name="pickup_location" value="{{ $data['car_location'] }}">
                 <input type="hidden" name="destination" value="{{ $data['destination'] }}">
                 <input type="hidden" name="service_type" value="{{ $data['service_type'] }}">
+                <input type="hidden" name="car_type" value="{{ $data['car_type'] }}">
+                <input type="hidden" name="fare" value="{{ $data['fare'] }}">
 
                 <div class="flex justify-end space-x-3">
                     <button type="button" id="cancelBtn" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
-                    <button type="submit" 
-                        style="background-color: #2563eb; 
-                               color: white; 
-                               padding: 0.5rem 1rem; 
-                               border-radius: 0.375rem; 
+                    <button type="submit"
+                        style="background-color: #2563eb;
+                               color: white;
+                               padding: 0.5rem 1rem;
+                               border-radius: 0.375rem;
                                font-weight: 600;
                                border: none;
                                cursor: pointer;

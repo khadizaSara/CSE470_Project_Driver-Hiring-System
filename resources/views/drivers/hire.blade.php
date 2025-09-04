@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="max-w-lg mx-auto p-6 bg-white rounded shadow">
-        <form method="POST" action="{{ route('drivers.list') }}">
+        <form id="hire-form" method="POST" action="{{ route('drivers.list') }}">
             @csrf
             <div class="mb-4">
                 <label for="car_location" class="block font-semibold mb-1">Car Location</label>
@@ -40,9 +40,26 @@
                 </select>
             </div>
 
+            <!-- Added Car Type Dropdown -->
+            <div class="mb-4">
+                <label for="car_type" class="block font-semibold mb-1">Car Type</label>
+                <select id="car_type" name="car_type" class="block w-full border rounded px-2 py-1" required>
+                    <option value="sedan">Sedan</option>
+                    <option value="suv">SUV</option>
+                    <option value="microbus">Microbus</option>
+                    <option value="hatchback">Hatchback</option>
+                </select>
+            </div>
+
+            <!-- Fare Display -->
+            <div class="mb-4">
+                <label class="block font-semibold mb-1">Estimated Fare:</label>
+                <span id="fare-display" class="text-lg font-bold">—</span> <span>৳</span>
+            </div>
+
             <button type="submit"
                 style="
-                    background: #3b82f6;   /* A clear blue */
+                    background: #3b82f6;
                     color: #ffffff;
                     padding: 0.5rem 1rem;
                     border-radius: 0.375rem;
@@ -57,7 +74,6 @@
     </div>
     <div id="map" style="height: 400px; width: 100%;" class="mt-6"></div>
 
-    
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBW2cnlqruVIYZC7YgYC4j9XcVzeGshEOw"></script>
     <script>
         let map, directionsService, directionsRenderer;
@@ -95,10 +111,53 @@
             }
         }
 
+        // Fare calculation code added
+        const fareRanges = {
+            sedan: [300, 350],
+            suv: [400, 450],
+            microbus: [500, 550],
+            hatchback: [350, 400]
+        };
+
+        function calculateFare(serviceType, carType) {
+            let minFare = fareRanges[carType][0];
+            let maxFare = fareRanges[carType][1];
+            if(serviceType === 'urgent') {
+                minFare += 80;
+                maxFare += 100;
+            }
+            return Math.floor(Math.random() * (maxFare - minFare + 1)) + minFare;
+        }
+
+        function updateFareDisplay() {
+            const serviceType = document.getElementById('service_type').value;
+            const carType = document.getElementById('car_type').value;
+            if(serviceType && carType) {
+                const fare = calculateFare(serviceType, carType);
+                document.getElementById('fare-display').textContent = fare;
+                
+                // Update or add hidden input for fare to submit with form
+                let fareInput = document.getElementById('fare-input');
+                if (!fareInput) {
+                    fareInput = document.createElement('input');
+                    fareInput.type = 'hidden';
+                    fareInput.name = 'fare';
+                    fareInput.id = 'fare-input';
+                    document.getElementById('hire-form').appendChild(fareInput);
+                }
+                fareInput.value = fare;
+            } else {
+                document.getElementById('fare-display').textContent = '—';
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             initMap();
             document.getElementById("car_location").addEventListener("change", calculateRoute);
             document.getElementById("destination").addEventListener("change", calculateRoute);
+            document.getElementById("service_type").addEventListener("change", updateFareDisplay);
+            document.getElementById("car_type").addEventListener("change", updateFareDisplay);
+            updateFareDisplay();
         });
     </script>
 </x-app-layout>
