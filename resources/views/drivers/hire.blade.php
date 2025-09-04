@@ -8,6 +8,7 @@
     <div class="max-w-lg mx-auto p-6 bg-white rounded shadow">
         <form id="hire-form" method="POST" action="{{ route('drivers.list') }}">
             @csrf
+
             <div class="mb-4">
                 <label for="car_location" class="block font-semibold mb-1">Car Location</label>
                 <select name="car_location" id="car_location" class="block w-full border rounded px-2 py-1" required>
@@ -20,6 +21,7 @@
                     <option value="Chittagong, Bangladesh">Chittagong, Bangladesh</option>
                 </select>
             </div>
+
             <div class="mb-4">
                 <label for="destination" class="block font-semibold mb-1">Destination</label>
                 <select name="destination" id="destination" class="block w-full border rounded px-2 py-1" required>
@@ -32,6 +34,7 @@
                     <option value="Chittagong, Bangladesh">Chittagong, Bangladesh</option>
                 </select>
             </div>
+
             <div class="mb-4">
                 <label for="service_type" class="block font-semibold mb-1">Service Type</label>
                 <select name="service_type" id="service_type" class="block w-full border rounded px-2 py-1" required>
@@ -40,7 +43,6 @@
                 </select>
             </div>
 
-            <!-- Added Car Type Dropdown -->
             <div class="mb-4">
                 <label for="car_type" class="block font-semibold mb-1">Car Type</label>
                 <select id="car_type" name="car_type" class="block w-full border rounded px-2 py-1" required>
@@ -51,10 +53,9 @@
                 </select>
             </div>
 
-            <!-- Fare Display -->
             <div class="mb-4">
                 <label class="block font-semibold mb-1">Estimated Fare:</label>
-                <span id="fare-display" class="text-lg font-bold">—</span> <span>৳</span>
+                <span id="fare-display" class="text-lg font-bold">— ৳</span>
             </div>
 
             <button type="submit"
@@ -72,6 +73,7 @@
             </button>
         </form>
     </div>
+
     <div id="map" style="height: 400px; width: 100%;" class="mt-6"></div>
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBW2cnlqruVIYZC7YgYC4j9XcVzeGshEOw"></script>
@@ -111,52 +113,75 @@
             }
         }
 
-        // Fare calculation code added
-        const fareRanges = {
-            sedan: [300, 350],
-            suv: [400, 450],
-            microbus: [500, 550],
-            hatchback: [350, 400]
-        };
-
-        function calculateFare(serviceType, carType) {
-            let minFare = fareRanges[carType][0];
-            let maxFare = fareRanges[carType][1];
-            if(serviceType === 'urgent') {
-                minFare += 80;
-                maxFare += 100;
+        function calculateFare(serviceType, carType, origin, destination) {
+            if (!origin || !destination) {
+                return 0;
             }
-            return Math.floor(Math.random() * (maxFare - minFare + 1)) + minFare;
+            // Example fixed fares based on origin-destination pairs
+            let baseFare = 0;
+            if ((origin === 'Gulshan, Dhaka' && destination === 'Uttara, Dhaka') ||
+                (origin === 'Uttara, Dhaka' && destination === 'Gulshan, Dhaka')) {
+                baseFare = 500;
+            } else if ((origin === 'Dhanmondi, Dhaka' && destination === 'Mirpur, Dhaka') ||
+                       (origin === 'Mirpur, Dhaka' && destination === 'Dhanmondi, Dhaka')) {
+                baseFare = 400;
+            } else {
+                baseFare = 300; // default
+            }
+
+            let carTypeSurcharge = 0;
+            switch(carType) {
+                case 'sedan': carTypeSurcharge = 100; break;
+                case 'suv': carTypeSurcharge = 150; break;
+                case 'microbus': carTypeSurcharge = 200; break;
+                case 'hatchback': carTypeSurcharge = 80; break;
+            }
+
+            let fare = baseFare + carTypeSurcharge;
+
+            if(serviceType === 'urgent'){
+                fare += 100;
+            }
+            return fare;
         }
 
         function updateFareDisplay() {
             const serviceType = document.getElementById('service_type').value;
             const carType = document.getElementById('car_type').value;
-            if(serviceType && carType) {
-                const fare = calculateFare(serviceType, carType);
-                document.getElementById('fare-display').textContent = fare;
-                
-                // Update or add hidden input for fare to submit with form
-                let fareInput = document.getElementById('fare-input');
-                if (!fareInput) {
-                    fareInput = document.createElement('input');
-                    fareInput.type = 'hidden';
-                    fareInput.name = 'fare';
-                    fareInput.id = 'fare-input';
-                    document.getElementById('hire-form').appendChild(fareInput);
-                }
-                fareInput.value = fare;
-            } else {
-                document.getElementById('fare-display').textContent = '—';
+            const origin = document.getElementById('car_location').value;
+            const destination = document.getElementById('destination').value;
+
+            const fare = calculateFare(serviceType, carType, origin, destination);
+
+            document.getElementById('fare-display').textContent = fare ? fare + ' ৳' : '— ৳';
+
+            let fareInput = document.getElementById('fare-input');
+            if (!fareInput) {
+                fareInput = document.createElement('input');
+                fareInput.type = 'hidden';
+                fareInput.name = 'fare';
+                fareInput.id = 'fare-input';
+                document.getElementById('hire-form').appendChild(fareInput);
             }
+            fareInput.value = fare || 0;
         }
 
         document.addEventListener("DOMContentLoaded", function() {
             initMap();
-            document.getElementById("car_location").addEventListener("change", calculateRoute);
-            document.getElementById("destination").addEventListener("change", calculateRoute);
+
+            document.getElementById("car_location").addEventListener("change", () => {
+                calculateRoute();
+                updateFareDisplay();
+            });
+
+            document.getElementById("destination").addEventListener("change", () => {
+                calculateRoute();
+                updateFareDisplay();
+            });
+
             document.getElementById("service_type").addEventListener("change", updateFareDisplay);
             document.getElementById("car_type").addEventListener("change", updateFareDisplay);
+
             updateFareDisplay();
         });
     </script>
