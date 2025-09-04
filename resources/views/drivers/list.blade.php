@@ -52,6 +52,8 @@
             <form method="POST" action="{{ route('booking.store') }}" id="confirmForm">
                 @csrf
                 <input type="hidden" name="driver_id" id="modalDriverId">
+
+                <!-- Preserving hire form data as hidden inputs -->
                 <input type="hidden" name="pickup_location" value="{{ $data['car_location'] }}">
                 <input type="hidden" name="destination" value="{{ $data['destination'] }}">
                 <input type="hidden" name="service_type" value="{{ $data['service_type'] }}">

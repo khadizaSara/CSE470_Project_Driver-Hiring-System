@@ -15,12 +15,22 @@
                 Start your trip
             </button>
         </div>
+
+        <!-- Trip Started Notification with Close button (hidden by default) -->
+        <div id="tripStartedNotification" style="display:none; position:fixed; top: 30%; left:50%; transform:translate(-50%,-50%); z-index:10000; background:#dbeafe; border:2px solid #3b82f6; padding:2rem 2.5rem; border-radius:1rem; box-shadow:0 10px 32px rgba(0,0,0,0.12); text-align:center;">
+            <h3 style="font-size:1.5rem; margin-bottom:1rem; color:#2563eb;">Trip started!</h3>
+            <button id="closeTripBtn" style="background-color:#2563eb; color:white; padding:0.6rem 1.6rem; border:none; border-radius:0.5rem; font-size:1.1rem; font-weight:600; cursor:pointer;">
+                Close
+            </button>
+        </div>
     </div>
 
     @push('scripts')
         <!-- Load Google Maps JS API -->
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBW2cnlqruVIYZC7YgYC4j9XcVzeGshEOw"></script>
         <script>
+            console.log('Booking ID:', {{ $booking->id }});
+
             let map;
             let driverMarker;
             let bookingId = {{ $booking->id }};
@@ -60,7 +70,16 @@
 
                 document.getElementById('startTripBtn').addEventListener('click', function() {
                     document.getElementById('arrivalNotification').style.display = 'none';
-                    alert('Trip started!');
+
+                    // Show trip started notification
+                    document.getElementById('tripStartedNotification').style.display = 'block';
+
+                    //alert('Trip started!');
+                });
+
+                document.getElementById('closeTripBtn').addEventListener('click', function() {
+                    // Redirect to trip arrival/payment page
+                    window.location.href = "{{ route('trip.arrival', ['booking' => $booking->id]) }}";
                 });
             });
         </script>

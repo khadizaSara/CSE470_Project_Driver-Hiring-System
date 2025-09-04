@@ -5,6 +5,8 @@ use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\HireDriverController;
 use App\Http\Controllers\DriverSelectionController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\TripController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -41,6 +43,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/driver-location/{booking}', [BookingController::class, 'driverLocation'])
         ->name('api.driver.location')
         ->middleware('auth');
+
+    // Show arrival & payment page
+    Route::get('/trip/arrival/{booking}', [TripController::class, 'showArrival'])->name('trip.arrival')->middleware('auth');
+
+    // Handle payment confirmation
+    Route::post('/trip/arrival/{booking}/pay', [TripController::class, 'confirmPayment'])->name('trip.payment.confirm')->middleware('auth');
+
 
     Route::post('/test-route', function () {
         return 'Test route works';
