@@ -28,10 +28,8 @@
             @endisset
 
             <!-- Page Content -->
-            <a href="{{ route('dashboard') }}">Dashboard</a>
-
             <main>
-                @yield('content')
+                {{ $slot }}
             </main>
         </div>
 
