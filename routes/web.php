@@ -6,7 +6,7 @@ use App\Http\Controllers\HireDriverController;
 use App\Http\Controllers\DriverSelectionController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\TripController;
-
+use App\Http\Controllers\ReviewController; 
 
 Route::get('/', function () {
     return view('welcome');
@@ -49,6 +49,12 @@ Route::middleware(['auth'])->group(function () {
 
     // Handle payment confirmation
     Route::post('/trip/arrival/{booking}/pay', [TripController::class, 'confirmPayment'])->name('trip.payment.confirm')->middleware('auth');
+
+    Route::middleware('auth')->group(function () {
+    Route::get('/trip/{booking}/rate', [TripController::class, 'rateDriver'])->name('trip.rateDriver');
+    });
+
+    Route::middleware('auth')->post('/review/submit', [ReviewController::class, 'submit'])->name('review.submit');
 
 
     Route::post('/test-route', function () {

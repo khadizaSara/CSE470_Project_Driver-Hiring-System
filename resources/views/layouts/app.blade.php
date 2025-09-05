@@ -31,7 +31,7 @@
             <a href="{{ route('dashboard') }}">Dashboard</a>
 
             <main>
-                {{ $slot }}
+                @yield('content')
             </main>
         </div>
 

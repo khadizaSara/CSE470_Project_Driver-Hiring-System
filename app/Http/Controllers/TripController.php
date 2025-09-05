@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Auth;
 
 class TripController extends Controller
 {
-    // Apply auth middleware to all methods in this controller
     public function __construct()
     {
         $this->middleware('auth');
@@ -18,7 +17,6 @@ class TripController extends Controller
     // Show arrival and payment page
     public function showArrival(Booking $booking)
     {
-        // Ensure booking belongs to authenticated user for security
         if ($booking->user_id !== Auth::id()) {
             abort(403, 'Unauthorized access to booking.');
         }
@@ -29,7 +27,6 @@ class TripController extends Controller
     // Handle payment confirmation
     public function confirmPayment(Request $request, Booking $booking)
     {
-        // Ensure booking belongs to authenticated user
         if ($booking->user_id !== Auth::id()) {
             abort(403, 'Unauthorized payment attempt.');
         }
@@ -40,7 +37,7 @@ class TripController extends Controller
 
         // Save payment info and mark trip as completed
         $booking->payment_method = $request->payment_method;
-        $booking->payment_status = 'paid'; // You can also use boolean or enum as you set
+        $booking->payment_status = 'paid';
         $booking->trip_status = 'completed';
         $booking->save();
 
@@ -49,7 +46,17 @@ class TripController extends Controller
         $user->trips_count = ($user->trips_count ?? 0) + 1;
         $user->save();
 
-        // Redirect to dashboard with success notification
-        return redirect()->route('dashboard')->with('success', 'Payment confirmed. Thank you for riding with us!');
+        // Redirect to the driver rating page (Pass booking id)
+        return redirect()->route('trip.rateDriver', ['booking' => $booking->id]);
+    }
+
+    // Show the rating and review form for driver
+    public function rateDriver(Booking $booking)
+    {
+        if ($booking->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized access to booking.');
+        }
+        $driver = $booking->driver; // Assuming you have driver relation in Booking model
+        return view('trip.rate-driver', compact('booking', 'driver'));
     }
 }
