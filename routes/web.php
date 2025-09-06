@@ -7,6 +7,7 @@ use App\Http\Controllers\DriverSelectionController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\TripController;
 use App\Http\Controllers\ReviewController; 
+use App\Http\Controllers\DriverController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -55,6 +56,9 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware('auth')->post('/review/submit', [ReviewController::class, 'submit'])->name('review.submit');
+
+    Route::post('/driver/{driverId}/review', [DriverController::class, 'saveReview'])->name('driver.saveReview');
+    Route::get('/driver/{driverId}/review', [DriverController::class, 'reviewForm'])->name('driver.review');
 
 
     Route::post('/test-route', function () {

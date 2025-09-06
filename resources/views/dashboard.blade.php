@@ -7,6 +7,11 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            @if (session('success'))
+                <div class="bg-green-500 text-white p-4 rounded mb-4 shadow text-center font-semibold">
+                    {{ session('success') }}
+                </div>
+            @endif
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     {{ __("You're logged in!") }}
@@ -22,5 +27,4 @@
             Hire a Driver
         </a>
     </div>
-
 </x-app-layout>
