@@ -170,7 +170,6 @@
             const fare = calculateFare(serviceType, carType, origin, destination);
             document.getElementById('fare-display').textContent = fare ? fare + ' ৳' : '— ৳';
 
-        
             let fareInput = document.getElementById('fare-input');
             if (!fareInput) {
                 fareInput = document.createElement('input');
@@ -228,10 +227,8 @@
             updateFareDisplay();
         });
 
-        
         document.getElementById('hire-form').addEventListener('submit', function(e) {
-            updateFareDisplay(); 
-            
+            updateFareDisplay();
             const fareInput = document.getElementById('fare-input');
             console.log('Submitting fare:', fareInput ? fareInput.value : 'No fare input found');
         });

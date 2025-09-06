@@ -25,7 +25,6 @@ class ReviewController extends Controller
 
         $driver = Driver::findOrFail($request->driver_id);
 
-        // Create new review
         $review = new Review();
         $review->driver_id = $driver->id;
         $review->user_id = Auth::id();
@@ -34,7 +33,6 @@ class ReviewController extends Controller
         $review->review = $request->review;
         $review->save();
 
-        // Update the average rating in drivers table
         $averageRating = Review::where('driver_id', $driver->id)->avg('rating');
         $driver->average_rating = $averageRating;
         $driver->save();

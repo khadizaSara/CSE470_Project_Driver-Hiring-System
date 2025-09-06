@@ -15,6 +15,7 @@ class DriverSelectionController extends Controller
             'service_type' => 'required|in:regular,urgent',
             'car_type' => 'required|string',
             'fare' => 'required|integer',
+            'promocode' => 'nullable|string',
         ]);
 
         $drivers = Driver::where('type', $data['service_type'])
@@ -33,10 +34,9 @@ class DriverSelectionController extends Controller
             'service_type' => 'required|string',
             'car_type' => 'required|string',
             'fare' => 'required|integer',
+            'promocode' => 'nullable|string',
         ]);
 
-        // TODO: Save booking & chosen driver info here if needed
-
-        return redirect()->route('profile.edit')->with('success', 'You chose driver ID ' . $validated['driver_id']);
+        return redirect()->route('booking.store')->with('booking_data', $validated);
     }
 }

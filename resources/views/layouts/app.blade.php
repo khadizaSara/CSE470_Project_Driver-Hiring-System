@@ -31,6 +31,8 @@
             <main>
                 {{ $slot }}
             </main>
+
+
         </div>
 
         <!-- Include pushed scripts -->

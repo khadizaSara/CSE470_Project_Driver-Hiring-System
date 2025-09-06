@@ -22,9 +22,25 @@
                 <p><strong>Experience:</strong> {{ $driver->experience }} years</p>
                 <p><strong>Average Rating:</strong> {{ number_format($driver->average_rating, 2) }} / 5</p>
 
-                @foreach ($driver->reviews as $review)
-                    <p>{{ $review->rating }} stars - {{ $review->review }}</p>
-                @endforeach
+                <div>
+                    <button
+                        type="button"
+                        class="reviews-toggle-btn mt-2 px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                        onclick="this.nextElementSibling.classList.toggle('hidden')"
+                    >
+                        Show Reviews ({{ $driver->reviews->count() }})
+                    </button>
+                    <div class="reviews-dropdown mt-2 hidden border p-2 rounded bg-gray-50 max-h-48 overflow-y-auto">
+                        @forelse ($driver->reviews as $review)
+                            <div class="mb-2 border-b pb-1">
+                                <div><strong>{{ $review->rating }} stars</strong></div>
+                                <div class="text-sm text-gray-700">{{ $review->review }}</div>
+                            </div>
+                        @empty
+                            <p class="text-sm text-gray-500">No reviews yet.</p>
+                        @endforelse
+                    </div>
+                </div>
 
                 <p><strong>Driver Type:</strong> {{ ucfirst($driver->type) }}</p>
 

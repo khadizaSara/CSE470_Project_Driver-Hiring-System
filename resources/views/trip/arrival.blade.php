@@ -8,7 +8,16 @@
     <div class="max-w-md mx-auto mt-8 p-6 bg-white shadow rounded">
         <p class="mb-4 font-semibold text-lg">You have arrived at your destination</p>
         <p class="mb-6">
-            Payable Amount: <strong>{{ $booking->fare !== null ? $booking->fare . ' ৳' : 'N/A' }}</strong>
+            @if(isset($booking->discounted_fare) && $booking->discounted_fare != $booking->fare)
+                <span class="line-through text-gray-500 text-lg">{{ $booking->fare }} ৳</span>
+                <span class="font-bold text-green-700 text-xl ml-2">{{ $booking->discounted_fare }} ৳</span>
+                <br>
+                <small class="text-green-700">
+                    You saved {{ $booking->fare - $booking->discounted_fare }} ৳
+                </small>
+            @else
+                <strong class="text-xl">{{ $booking->fare ?? 'N/A' }} ৳</strong>
+            @endif
         </p>
 
         <form method="POST" action="{{ route('trip.payment.confirm', $booking->id) }}">

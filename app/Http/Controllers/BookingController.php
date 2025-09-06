@@ -47,6 +47,11 @@ class BookingController extends Controller
 
                 $promo->is_used = true;
                 $promo->save();
+
+                // DEBUG LOG START
+                \Log::info('Promo code applied for user: ' . Auth::id());
+                // DEBUG LOG END
+
             }
         }
 
@@ -60,6 +65,10 @@ class BookingController extends Controller
             'fare' => $originalFare,
             'discounted_fare' => $discountedFare,
         ]);
+
+        // DEBUG LOG START
+        \Log::info('Booking created: ', $booking->toArray());
+        // DEBUG LOG END
 
         return redirect()->route('booking.track', $booking->id);
     }
@@ -118,38 +127,7 @@ class BookingController extends Controller
         ]);
     }
 
-    public function completeTrip(Request $request)
-    {
-        $user = Auth::user();
-        $user->trip_count++;
-        if ($user->trip_count % 3 == 0) {
-            Promocode::create([
-                'user_id' => $user->id,
-                'code' => strtoupper(Str::random(8)),
-                'discount_percentage' => rand(15, 30),
-                'is_used' => false,
-            ]);
-        }
-        $user->save();
-    }
-
     public function confirmPayment(Request $request, Booking $booking)
     {
-        $user = Auth::user();
-        $inputPromoCode = $request->input('promocode');
-
-        if ($inputPromoCode) {
-            $promo = Promocode::where('user_id', $user->id)
-                ->where('code', $inputPromoCode)
-                ->where('is_used', false)
-                ->first();
-
-            if ($promo) {
-                $promo->is_used = true;
-                $promo->save();
-            }
-        }
-
-        return redirect()->route('dashboard')->with('success', 'Payment confirmed and promocode applied!');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Driver;
 use App\Models\Review;
+use App\Models\Booking;
 use Illuminate\Support\Facades\Auth;
 
 class DriverController extends Controller
@@ -47,5 +48,71 @@ class DriverController extends Controller
         $driver->save();
 
         return redirect()->route('dashboard')->with('success', 'Review submitted successfully. Thank you!');
+    }
+
+    // New method to save a booking with discounted fare
+    public function storeBooking(Request $request)
+    {
+        $request->validate([
+            'car_location' => 'required|string',
+            'destination' => 'required|string',
+            'service_type' => 'required|string',
+            'car_type' => 'required|string',
+            'fare' => 'required|numeric',
+            'promocode' => 'nullable|string',
+        ]);
+
+        // Optionally, you can store the original fare too if you want to show original price
+        // Here let's re-calculate original fare ignoring promo for record
+        $originalFare = $this->calculateOriginalFare(
+            $request->car_location,
+            $request->destination,
+            $request->service_type,
+            $request->car_type
+        );
+
+        $booking = Booking::create([
+            'user_id' => Auth::id(),
+            'car_location' => $request->car_location,
+            'destination' => $request->destination,
+            'service_type' => $request->service_type,
+            'car_type' => $request->car_type,
+            'original_fare' => $originalFare,
+            'fare' => $request->fare, // discounted fare passed from form
+            'promo_code' => $request->promocode,
+        ]);
+
+        return redirect()->route('trip.completed', ['booking' => $booking->id]);
+    }
+
+    // Helper to calculate original fare (without promo discount logic)
+    private function calculateOriginalFare($origin, $destination, $serviceType, $carType)
+    {
+        $baseFare = 0;
+        if (($origin === 'Gulshan, Dhaka' && $destination === 'Uttara, Dhaka') ||
+            ($origin === 'Uttara, Dhaka' && $destination === 'Gulshan, Dhaka')) {
+            $baseFare = 500;
+        } elseif (($origin === 'Dhanmondi, Dhaka' && $destination === 'Mirpur, Dhaka') ||
+                  ($origin === 'Mirpur, Dhaka' && $destination === 'Dhanmondi, Dhaka')) {
+            $baseFare = 400;
+        } else {
+            $baseFare = 300;
+        }
+
+        $carTypeSurcharge = 0;
+        switch ($carType) {
+            case 'sedan': $carTypeSurcharge = 100; break;
+            case 'suv': $carTypeSurcharge = 150; break;
+            case 'microbus': $carTypeSurcharge = 200; break;
+            case 'hatchback': $carTypeSurcharge = 80; break;
+        }
+
+        $fare = $baseFare + $carTypeSurcharge;
+
+        if ($serviceType === 'urgent') {
+            $fare += 100;
+        }
+
+        return $fare;
     }
 }

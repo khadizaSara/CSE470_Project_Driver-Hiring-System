@@ -2,72 +2,72 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\Promocode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class TripController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
-    /**
-     *
-     * @param Booking $booking
-     * @return \Illuminate\View\View
-     */
     public function showArrival(Booking $booking)
     {
-        if ($booking->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized access to booking.');
-        }
-
         return view('trip.arrival', compact('booking'));
     }
 
-    /**
-     *
-     * @param Request $request
-     * @param int $tripId
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function confirmPayment(Request $request, $tripId)
+    public function confirmPayment(Request $request, Booking $booking)
     {
-        $trip = Booking::findOrFail($tripId);
+        $user = Auth::user();
+        $inputPromoCode = $request->input('promocode');
 
-        if ($trip->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized payment attempt.');
+        if ($inputPromoCode) {
+            $promo = Promocode::where('user_id', $user->id)
+                ->where('code', $inputPromoCode)
+                ->where('is_used', false)
+                ->first();
+
+            if ($promo) {
+                $promo->is_used = true;
+                $promo->save();
+
+                $user->trip_count = 0;
+                $user->save();
+
+                \Log::info('Promo used and trip count reset for user: ' . $user->id);
+            }
+        } else {
+            $user->trip_count++;
+
+            \Log::info('Trip count incremented to ' . $user->trip_count . ' for user: ' . $user->id);
+
+            if ($user->trip_count % 3 == 0) {
+                $existingPromo = Promocode::where('user_id', $user->id)
+                    ->where('is_used', false)
+                    ->first();
+
+                if (!$existingPromo) {
+                    Promocode::create([
+                        'user_id' => $user->id,
+                        'code' => strtoupper(Str::random(8)),
+                        'discount_percentage' => rand(15, 30),
+                        'is_used' => false,
+                    ]);
+
+                    \Log::info('New promo code generated for user ' . $user->id);
+                } else {
+                    \Log::info('Existing unused promo found for user ' . $user->id);
+                }
+            }
+
+            $user->save();
         }
 
-        $request->validate([
-            'payment_method' => 'required|in:credit_card,bkash,cash',
-        ]);
-
-        $trip->payment_method = $request->payment_method;
-        $trip->payment_status = 'paid';
-        $trip->trip_status = 'completed';
-        $trip->save();
-
-        $user = Auth::user();
-        $user->increment('trip_count');
-
-
-        return redirect()->route('driver.review', ['driverId' => $trip->driver_id]);
+        return redirect()->route('trip.rateDriver', ['booking' => $booking->id]);
     }
 
-    /**
-     * @param Booking $booking
-     * @return \Illuminate\View\View
-     */
     public function rateDriver(Booking $booking)
     {
-        if ($booking->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized access to booking.');
-        }
         $driver = $booking->driver;
-        return view('trip.rate-driver', compact('booking', 'driver'));
+        return view('trip.rate', compact('booking', 'driver'));
     }
 }
