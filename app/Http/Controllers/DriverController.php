@@ -46,6 +46,6 @@ class DriverController extends Controller
         $driver->rating = $averageRating;
         $driver->save();
 
-        return redirect()->route('drivers.list')->with('success', 'Review submitted.');
+        return redirect()->route('dashboard')->with('success', 'Review submitted successfully. Thank you!');
     }
 }

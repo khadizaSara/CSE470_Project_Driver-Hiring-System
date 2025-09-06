@@ -6,43 +6,39 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\UserProfile;
+use App\Models\Review;
+use App\Models\Promocode;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
+
     public function profile()
-{
-    return $this->hasOne(UserProfile::class);
-}
+    {
+        return $this->hasOne(UserProfile::class);
+    }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    public function promocodes()
+    {
+        return $this->hasMany(Promocode::class);
+    }
+
     protected function casts(): array
     {
         return [

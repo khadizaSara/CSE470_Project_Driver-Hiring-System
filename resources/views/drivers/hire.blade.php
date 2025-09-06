@@ -6,6 +6,12 @@
     </x-slot>
 
     <div class="max-w-lg mx-auto p-6 bg-white rounded shadow">
+        @if(session('error'))
+            <div class="bg-red-100 text-red-700 p-3 rounded mb-4 shadow text-center font-semibold">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <form id="hire-form" method="POST" action="{{ route('drivers.list') }}">
             @csrf
 
@@ -52,10 +58,17 @@
                     <option value="hatchback">Hatchback</option>
                 </select>
             </div>
+            
+            <div class="mb-4">
+                <label for="promocode" class="block font-semibold mb-1">Promo Code (optional)</label>
+                <input type="text" id="promocode" name="promocode" class="block w-full border rounded px-2 py-1" placeholder="Enter promo code">
+                <span id="promo-feedback" class="text-sm mt-1 block"></span>
+            </div>
 
             <div class="mb-4">
                 <label class="block font-semibold mb-1">Estimated Fare:</label>
                 <span id="fare-display" class="text-lg font-bold">— ৳</span>
+                <span id="discounted-fare-display" class="text-lg font-bold text-green-700 ml-4"></span>
             </div>
 
             <button type="submit"
@@ -75,6 +88,10 @@
     </div>
 
     <div id="map" style="height: 400px; width: 100%;" class="mt-6"></div>
+
+    <script>
+        window.availablePromocodes = @json($promocodes->pluck('discount_percentage', 'code'));
+    </script>
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBW2cnlqruVIYZC7YgYC4j9XcVzeGshEOw"></script>
     <script>
@@ -117,7 +134,6 @@
             if (!origin || !destination) {
                 return 0;
             }
-            // Example fixed fares based on origin-destination pairs
             let baseFare = 0;
             if ((origin === 'Gulshan, Dhaka' && destination === 'Uttara, Dhaka') ||
                 (origin === 'Uttara, Dhaka' && destination === 'Gulshan, Dhaka')) {
@@ -126,7 +142,7 @@
                        (origin === 'Mirpur, Dhaka' && destination === 'Dhanmondi, Dhaka')) {
                 baseFare = 400;
             } else {
-                baseFare = 300; // default
+                baseFare = 300;
             }
 
             let carTypeSurcharge = 0;
@@ -152,9 +168,9 @@
             const destination = document.getElementById('destination').value;
 
             const fare = calculateFare(serviceType, carType, origin, destination);
-
             document.getElementById('fare-display').textContent = fare ? fare + ' ৳' : '— ৳';
 
+        
             let fareInput = document.getElementById('fare-input');
             if (!fareInput) {
                 fareInput = document.createElement('input');
@@ -163,7 +179,33 @@
                 fareInput.id = 'fare-input';
                 document.getElementById('hire-form').appendChild(fareInput);
             }
-            fareInput.value = fare || 0;
+
+            const promoInput = document.getElementById('promocode');
+            const promoCode = promoInput.value.trim().toUpperCase();
+            const promoFeedback = document.getElementById('promo-feedback');
+            const promoData = window.availablePromocodes || {};
+            const discountDisplay = document.getElementById('discounted-fare-display');
+
+            let finalFare = fare;
+
+            if (promoCode && promoData[promoCode]) {
+                const discount = parseInt(promoData[promoCode], 10);
+                const discountedFare = Math.round(fare - (fare * discount / 100));
+                finalFare = discountedFare;
+                discountDisplay.textContent = `(With Promo: ${discountedFare} ৳)`;
+                promoFeedback.textContent = `Promo applied: -${discount}%`;
+                promoFeedback.className = "text-green-700 text-sm mt-1 block";
+            } else if (promoCode) {
+                discountDisplay.textContent = '';
+                promoFeedback.textContent = `Invalid or expired promo code.`;
+                promoFeedback.className = "text-red-600 text-sm mt-1 block";
+            } else {
+                discountDisplay.textContent = '';
+                promoFeedback.textContent = '';
+            }
+
+            fareInput.value = finalFare || 0;
+            console.log('Setting fare to:', finalFare);
         }
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -181,8 +223,17 @@
 
             document.getElementById("service_type").addEventListener("change", updateFareDisplay);
             document.getElementById("car_type").addEventListener("change", updateFareDisplay);
+            document.getElementById("promocode").addEventListener("input", updateFareDisplay);
 
             updateFareDisplay();
+        });
+
+        
+        document.getElementById('hire-form').addEventListener('submit', function(e) {
+            updateFareDisplay(); 
+            
+            const fareInput = document.getElementById('fare-input');
+            console.log('Submitting fare:', fareInput ? fareInput.value : 'No fare input found');
         });
     </script>
 </x-app-layout>

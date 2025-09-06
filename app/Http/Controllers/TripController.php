@@ -14,6 +14,11 @@ class TripController extends Controller
         $this->middleware('auth');
     }
 
+    /**
+     *
+     * @param Booking $booking
+     * @return \Illuminate\View\View
+     */
     public function showArrival(Booking $booking)
     {
         if ($booking->user_id !== Auth::id()) {
@@ -23,6 +28,12 @@ class TripController extends Controller
         return view('trip.arrival', compact('booking'));
     }
 
+    /**
+     *
+     * @param Request $request
+     * @param int $tripId
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function confirmPayment(Request $request, $tripId)
     {
         $trip = Booking::findOrFail($tripId);
@@ -40,21 +51,23 @@ class TripController extends Controller
         $trip->trip_status = 'completed';
         $trip->save();
 
-     
         $user = Auth::user();
         $user->increment('trip_count');
 
-        
+
         return redirect()->route('driver.review', ['driverId' => $trip->driver_id]);
     }
 
-
+    /**
+     * @param Booking $booking
+     * @return \Illuminate\View\View
+     */
     public function rateDriver(Booking $booking)
     {
         if ($booking->user_id !== Auth::id()) {
             abort(403, 'Unauthorized access to booking.');
         }
-        $driver = $booking->driver; 
+        $driver = $booking->driver;
         return view('trip.rate-driver', compact('booking', 'driver'));
     }
 }

@@ -66,4 +66,18 @@ Route::middleware(['auth'])->group(function () {
     })->name('test.route');
 });
 
+
+Route::get('/test-generate-promocode', function () {
+    $user = Auth::user();
+    $code = strtoupper(\Illuminate\Support\Str::random(8));
+    \App\Models\Promocode::create([
+        'user_id' => $user->id,
+        'code' => $code,
+        'discount_percentage' => rand(15, 30),
+        'is_used' => false,
+    ]);
+    return "Promo $code created!";
+})->middleware('auth');
+
+
 require __DIR__.'/auth.php';

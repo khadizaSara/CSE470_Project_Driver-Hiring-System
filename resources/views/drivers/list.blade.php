@@ -11,16 +11,22 @@
         <p><strong>Service Type:</strong> {{ ucfirst($data['service_type']) }}</p>
         <p><strong>Car Type:</strong> {{ $data['car_type'] }}</p>
         <p><strong>Fare:</strong> {{ $data['fare'] }} ৳</p>
+        <p><strong>Promo Code:</strong> {{ $data['promocode'] ?? 'None' }}</p>
 
         <h3 class="text-lg font-semibold mt-6 mb-4">Available Drivers</h3>
 
         @foreach ($drivers as $driver)
             <div class="border rounded p-4 mb-4 shadow-sm">
-                <h4 class="font-bold text-xl">{{ $driver['name'] }}</h4>
-                <p><strong>Age:</strong> {{ $driver['age'] }}</p>
-                <p><strong>Experience:</strong> {{ $driver['experience'] }} years</p>
-                <p><strong>Rating:</strong> {{ $driver['rating'] }} / 5</p>
-                <p><strong>Driver Type:</strong> {{ ucfirst($driver['type']) }}</p>
+                <h4 class="font-bold text-xl">{{ $driver->name }}</h4>
+                <p><strong>Age:</strong> {{ $driver->age }}</p>
+                <p><strong>Experience:</strong> {{ $driver->experience }} years</p>
+                <p><strong>Average Rating:</strong> {{ number_format($driver->average_rating, 2) }} / 5</p>
+
+                @foreach ($driver->reviews as $review)
+                    <p>{{ $review->rating }} stars - {{ $review->review }}</p>
+                @endforeach
+
+                <p><strong>Driver Type:</strong> {{ ucfirst($driver->type) }}</p>
 
                 <button type="button"
                     class="choose-driver-btn mt-3"
@@ -36,7 +42,7 @@
                         transition: background 0.2s;"
                     onmouseover="this.style.background='#1e40af';"
                     onmouseout="this.style.background='#2563eb';"
-                    data-driver-id="{{ $driver['id'] }}"
+                    data-driver-id="{{ $driver->id }}"
                 >
                     Choose
                 </button>
@@ -52,13 +58,12 @@
             <form method="POST" action="{{ route('booking.store') }}" id="confirmForm">
                 @csrf
                 <input type="hidden" name="driver_id" id="modalDriverId">
-
-                <!-- Preserving hire form data as hidden inputs -->
                 <input type="hidden" name="pickup_location" value="{{ $data['car_location'] }}">
                 <input type="hidden" name="destination" value="{{ $data['destination'] }}">
                 <input type="hidden" name="service_type" value="{{ $data['service_type'] }}">
                 <input type="hidden" name="car_type" value="{{ $data['car_type'] }}">
                 <input type="hidden" name="fare" value="{{ $data['fare'] }}">
+                <input type="hidden" name="promocode" value="{{ $data['promocode'] ?? '' }}">
 
                 <div class="flex justify-end space-x-3">
                     <button type="button" id="cancelBtn" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
