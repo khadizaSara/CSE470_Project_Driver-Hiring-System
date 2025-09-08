@@ -62,8 +62,6 @@ class DriverController extends Controller
             'promocode' => 'nullable|string',
         ]);
 
-        // Optionally, you can store the original fare too if you want to show original price
-        // Here let's re-calculate original fare ignoring promo for record
         $originalFare = $this->calculateOriginalFare(
             $request->car_location,
             $request->destination,

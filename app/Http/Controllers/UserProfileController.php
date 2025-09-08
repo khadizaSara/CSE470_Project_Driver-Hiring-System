@@ -34,17 +34,12 @@ class UserProfileController extends Controller
 
     public function destroy(Request $request)
 {
-    // Example: delete the user's profile and/or the user account
     $user = Auth::user();
 
-    // Option 1: delete only user profile
     if ($user->profile) {
         $user->profile->delete();
     }
-    // Option 2: delete the user entirely (CAREFUL: logs them out!)
-    // $user->delete();
-
-    // Redirect after deletion
+    
     return redirect('/')->with('success', 'Profile deleted!');
 }
 }
